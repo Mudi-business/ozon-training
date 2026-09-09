@@ -3,9 +3,10 @@ import { defineConfig } from "@rspack/cli";
 import { rspack } from "@rspack/core";
 import * as RefreshPlugin from "@rspack/plugin-react-refresh";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
-
+import "dotenv/config"; 
 
 import { mfConfig } from "./module-federation.config";
+
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -77,6 +78,10 @@ export default defineConfig({
   plugins: [
     new rspack.HtmlRspackPlugin({
       template: "./index.html",
+    }),
+    new rspack.DefinePlugin({
+      // This safely injects variables during build time
+      "process.env": JSON.stringify(process.env),
     }),
     new ModuleFederationPlugin(mfConfig),
     isDev ? new RefreshPlugin() : null,

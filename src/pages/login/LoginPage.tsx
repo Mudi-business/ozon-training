@@ -1,15 +1,19 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { LoginRequestDto } from "../../dto/login";
+import { LoginService } from "../../services/auth";
+import { AxiosError } from "axios";
 
 const Login = () => {
-  const [formData, setFormData] = useState<{ email: string; password: string }>(
-    {
-      email: "",
-      password: "",
-    },
-  );
+  const Navigate = useNavigate();
+  const [formData, setFormData] = useState<LoginRequestDto>({
+    password: "",
+    phone_number: "",
+    username: "",
+  });
   const [errors, setErrors] = useState<any>({});
 
-  const handleChange = (e:any) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -26,10 +30,8 @@ const Login = () => {
 
   const validateForm = () => {
     const newErrors: any = {};
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
+    if (!formData.username) {
+      newErrors.email = "Username is required";
     }
     if (!formData.password) {
       newErrors.password = "Password is required";
@@ -39,13 +41,21 @@ const Login = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    //dsfjdk
     const newErrors = validateForm();
     if (Object.keys(newErrors).length === 0) {
       // Handle login logic here
-      console.log("Login submitted:", formData);
-      alert("Login successful!");
+      try {
+        console.log('debug =? ',newErrors);
+        
+        const response = await LoginService(`${process.env.API_URL}`,formData);
+      } catch (error: any) {
+        console.log("Log err => ", error);
+      }
+      // alert("Login successful!");
     } else {
       setErrors(newErrors);
     }
@@ -65,16 +75,16 @@ const Login = () => {
           {/* Email Field */}
           <div>
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Email Address
             </label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               placeholder="you@example.com"
               className={`w-full px-4 py-3 border ${errors.email ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200`}
@@ -105,9 +115,29 @@ const Login = () => {
               <p className="mt-1 text-sm text-red-500">{errors.password}</p>
             )}
           </div>
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Phone number
+            </label>
+            <input
+              type="text"
+              id="phone_number"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange}
+              placeholder="Your phone number"
+              className={`w-full px-4 py-3 border ${errors.password ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200`}
+            />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+            )}
+          </div>
 
           {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -127,7 +157,7 @@ const Login = () => {
             >
               Forgot password?
             </a>
-          </div>
+          </div> */}
 
           {/* Submit Button */}
           <button
@@ -138,10 +168,14 @@ const Login = () => {
           </button>
 
           <button
-            onClick={()=>setFormData({
-                    email:'',
-                    password:''
-                })}
+            // Clearing login Form
+            onClick={() => {
+              setFormData({
+                username: "",
+                password: "",
+                phone_number: "",
+              });
+            }}
             type="button"
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
@@ -150,13 +184,7 @@ const Login = () => {
 
           {/* Sign Up Link */}
           <p className="text-center text-sm text-gray-600 mt-4">
-            Don't have an account?{" "}
-            <a
-              href="#"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
-              Sign up
-            </a>
+            Don't have an account? <Link to={"/home"}>Sign up</Link>
           </p>
         </form>
       </div>
